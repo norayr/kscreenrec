@@ -1,82 +1,83 @@
 object ScreenRec: TScreenRec
   Left = 263
-  Height = 326
+  Height = 333
   Top = 233
-  Width = 412
+  Width = 421
   Caption = 'Kevin''s Screen Recorder'
-  ClientHeight = 326
-  ClientWidth = 412
-  DesignTimePPI = 94
+  ClientHeight = 333
+  ClientWidth = 421
+  LCLVersion = '3.99.0.0'
   OnCreate = FormCreate
-  LCLVersion = '2.0.8.0'
   object PageControl1: TPageControl
     Left = 0
-    Height = 269
-    Top = 48
-    Width = 402
+    Height = 275
+    Top = 49
+    Width = 411
     ActivePage = RecTab
     TabIndex = 0
     TabOrder = 0
     object RecTab: TTabSheet
       Caption = 'Recording'
-      ClientHeight = 239
-      ClientWidth = 392
+      ClientHeight = 235
+      ClientWidth = 407
       object Label3: TLabel
         Left = 16
-        Height = 18
+        Height = 26
         Top = 8
-        Width = 37
+        Width = 59
         Caption = 'Top X:'
         ParentColor = False
       end
       object Label4: TLabel
         Left = 17
-        Height = 18
-        Top = 44
-        Width = 36
+        Height = 26
+        Top = 45
+        Width = 58
         Caption = 'Top Y:'
         ParentColor = False
       end
       object RecX: TEdit
-        Left = 56
-        Height = 30
+        Left = 57
+        Height = 34
         Top = 8
-        Width = 78
+        Width = 80
         MaxLength = 4
         NumbersOnly = True
         TabOrder = 0
+        Text = '100'
       end
       object RecY: TEdit
-        Left = 56
-        Height = 30
-        Top = 40
-        Width = 78
+        Left = 57
+        Height = 34
+        Top = 41
+        Width = 80
         MaxLength = 4
         NumbersOnly = True
         TabOrder = 1
+        Text = '100'
       end
       object CopyYBtn: TButton
-        Left = 136
-        Height = 24
-        Top = 44
-        Width = 73
+        Left = 139
+        Height = 25
+        Top = 45
+        Width = 75
         Caption = 'Copy Y'
-        OnClick = CopyYBtnClick
         TabOrder = 2
+        OnClick = CopyYBtnClick
       end
       object Label5: TLabel
         Left = 16
-        Height = 18
-        Top = 80
-        Width = 90
+        Height = 26
+        Top = 82
+        Width = 138
         Caption = 'Recording size:'
         ParentColor = False
       end
       object RecSize: TComboBox
-        Left = 112
-        Height = 30
-        Top = 72
-        Width = 169
+        Left = 114
+        Height = 36
+        Top = 74
+        Width = 173
         ItemHeight = 0
         Items.Strings = (
           '800x600'
@@ -89,61 +90,61 @@ object ScreenRec: TScreenRec
       end
       object Label6: TLabel
         Left = 17
-        Height = 18
-        Top = 112
-        Width = 58
+        Height = 26
+        Top = 114
+        Width = 90
         Caption = 'Filename:'
         ParentColor = False
       end
-      object FLVFile: TEdit
-        Left = 80
-        Height = 30
-        Top = 104
-        Width = 272
+      object VideoFile: TEdit
+        Left = 82
+        Height = 34
+        Top = 106
+        Width = 278
         TabOrder = 4
-        Text = '/tmp/test.flv'
+        Text = '/tmp/test.mp4'
       end
       object RecBtn: TButton
         Left = 16
-        Height = 24
-        Top = 196
-        Width = 73
+        Height = 25
+        Top = 200
+        Width = 75
         Caption = 'Start'
-        OnClick = RecBtnClick
         TabOrder = 5
+        OnClick = RecBtnClick
       end
       object StopBtn: TButton
-        Left = 104
-        Height = 24
-        Top = 196
-        Width = 73
+        Left = 106
+        Height = 25
+        Top = 200
+        Width = 75
         Caption = 'Stop'
-        OnClick = StopBtnClick
         TabOrder = 6
+        OnClick = StopBtnClick
       end
       object KillBtn: TButton
-        Left = 192
-        Height = 24
-        Top = 196
-        Width = 73
+        Left = 196
+        Height = 25
+        Top = 200
+        Width = 75
         Caption = 'Kill'
-        OnClick = KillBtnClick
         TabOrder = 7
+        OnClick = KillBtnClick
       end
       object PlayBtn: TButton
-        Left = 279
-        Height = 24
-        Top = 196
-        Width = 73
+        Left = 285
+        Height = 25
+        Top = 200
+        Width = 75
         Caption = 'Play'
         Enabled = False
-        OnClick = PlayBtnClick
         TabOrder = 8
+        OnClick = PlayBtnClick
       end
       object Minute: TLabel
-        Left = 119
+        Left = 122
         Height = 19
-        Top = 156
+        Top = 159
         Width = 11
         Caption = '0'
         Font.Height = -16
@@ -153,9 +154,9 @@ object ScreenRec: TScreenRec
         ParentFont = False
       end
       object Label7: TLabel
-        Left = 136
+        Left = 139
         Height = 19
-        Top = 156
+        Top = 159
         Width = 6
         Caption = ':'
         Font.Height = -16
@@ -165,9 +166,9 @@ object ScreenRec: TScreenRec
         ParentFont = False
       end
       object Second: TLabel
-        Left = 144
+        Left = 147
         Height = 19
-        Top = 156
+        Top = 159
         Width = 22
         Caption = '00'
         Font.Height = -16
@@ -179,33 +180,33 @@ object ScreenRec: TScreenRec
     end
     object VBoxTab: TTabSheet
       Caption = 'VBox Y Calc'
-      ClientHeight = 239
-      ClientWidth = 392
+      ClientHeight = 235
+      ClientWidth = 407
       object Label1: TLabel
         Left = 8
-        Height = 18
+        Height = 26
         Top = 8
-        Width = 131
+        Width = 210
         Caption = 'Y position of window: '
         ParentColor = False
       end
       object VBoxY: TEdit
-        Left = 144
-        Height = 30
+        Left = 147
+        Height = 34
         Top = 0
-        Width = 78
+        Width = 80
         MaxLength = 4
         NumbersOnly = True
         TabOrder = 0
       end
       object VCButton: TButton
         Left = 8
-        Height = 24
-        Top = 43
-        Width = 73
+        Height = 25
+        Top = 44
+        Width = 75
         Caption = 'Calculate'
-        OnClick = VCButtonClick
         TabOrder = 1
+        OnClick = VCButtonClick
       end
     end
   end
@@ -213,9 +214,9 @@ object ScreenRec: TScreenRec
     Left = 8
     Height = 33
     Top = 8
-    Width = 259
+    Width = 330
     Caption = 'Kevin''s Screen Recorder'
-    Font.Height = -26
+    Font.Height = -27
     Font.Name = 'Impact'
     ParentColor = False
     ParentFont = False
@@ -234,13 +235,13 @@ object ScreenRec: TScreenRec
     WindowWidth = 0
     FillAttribute = 0
     XTermProgram = '/usr/bin/xterm'
-    left = 368
-    top = 280
+    Left = 376
+    Top = 286
   end
   object Timer: TTimer
     Enabled = False
     OnTimer = TimerTimer
-    left = 362
-    top = 15
+    Left = 370
+    Top = 15
   end
 end

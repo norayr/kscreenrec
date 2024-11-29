@@ -20,7 +20,7 @@ type
     KillBtn: TButton;
     StopBtn: TButton;
     RecBtn: TButton;
-    FLVFile: TEdit;
+    VideoFile: TEdit;
     Label6: TLabel;
     RecSize: TComboBox;
     CopyYBtn: TButton;
@@ -81,35 +81,61 @@ end;
 procedure TScreenRec.startRecording;
 begin
   if Proc.Active then
+  begin
+    ShowMessage('Process is already running.');
     Exit;
-  Proc.Executable:='/usr/bin/ffmpeg';
+  end;
+
+  Proc.Executable := '/usr/bin/ffmpeg';
   Proc.Parameters.Clear;
-  AddOption('-f','pulse');
-  AddOption('-ac','2');
-  AddOption('-i','record-n-play.monitor');
-  AddOption('-f','x11grab');
-  AddOption('-r','10');
-  AddOption('-s',RecSize.Text);
-  AddOption('-i',Concat(':0.0+',RecX.Text,',',RecY.Text));
-  AddOption('-c:v','libx264');
-  AddOption('-pix_fmt','yuv420p');
-  AddOption('-preset','ultrafast');
-  AddOption('-g','20');
-  AddOption('-b:v','2500k');
-  AddOption('-c:a','libmp3lame');
-  AddOption('-ar','44100');
-  AddOption('-threads','0');
-  AddOption('-bufsize','512k');
-  AddOption('-f','flv');
-  Proc.Parameters.Add(FLVFile.Text);
-  Proc.Active:=True;
-  RecBtn.Enabled:=False;
-  PlayBtn.Enabled:=False;
-  FMinute:=0;
-  FSecond:=0;
-  Minute.Caption:='0';
-  Second.Caption:='00';
-  Timer.Enabled:=True;
+   // Proc.Parameters.Add('-f');
+   // Proc.Parameters.Add('alsa');
+   // Proc.Parameters.Add('-ac');
+   // Proc.Parameters.Add('2');
+   // Proc.Parameters.Add('-i');
+   // Proc.Parameters.Add('record-n-play.monitor');     //presumably loopback
+
+   // Screen recording parameters
+   Proc.Parameters.Add('-f');
+   Proc.Parameters.Add('x11grab');
+   Proc.Parameters.Add('-framerate');
+   Proc.Parameters.Add('25');
+   Proc.Parameters.Add('-video_size');
+   Proc.Parameters.Add(RecSize.Text);
+   Proc.Parameters.Add('-i');
+   Proc.Parameters.Add(Concat(':0.0+', RecX.Text, ',', RecY.Text));
+
+   // Encoding options
+   Proc.Parameters.Add('-c:v');
+   Proc.Parameters.Add('libx264');
+   Proc.Parameters.Add('-preset');
+   Proc.Parameters.Add('ultrafast');
+   Proc.Parameters.Add('-pix_fmt');
+   Proc.Parameters.Add('yuv420p');
+
+   // Output file
+   Proc.Parameters.Add(VideoFile.Text);
+
+   // Configure process options to enable output redirection
+   Proc.Options := [poUsePipes, poNoConsole];
+
+   try
+     Proc.Active := True;
+     //ShowMessage('Recording started.');
+   except
+     on E: Exception do
+     begin
+       ShowMessage('Error starting FFmpeg: ' + E.Message);
+     end;
+   end;
+
+   RecBtn.Enabled := False;
+   PlayBtn.Enabled := False;
+   FMinute := 0;
+   FSecond := 0;
+   Minute.Caption := '0';
+   Second.Caption := '00';
+   Timer.Enabled := True;
 end;
 
 function TScreenRec.generateFileName: string;
@@ -121,7 +147,7 @@ begin
   i:=1;
   FOk:=False;
   repeat
-    fname:=Concat('/tmp/video_',IntToStr(i),'.flv');
+    fname:=Concat('/tmp/video_',IntToStr(i),'.mp4');
     if not FileExists(fname) then
       FOk:=True;
     Inc(i);
@@ -131,8 +157,8 @@ end;
 
 procedure TScreenRec.FormCreate(Sender: TObject);
 begin
-  Proc.Options:=[poNewConsole];
-  FLVFile.Text:=generateFileName;
+  Proc.Options:=[poUsePipes, poNoConsole];
+  VideoFile.Text:=generateFileName;
 end;
 
 procedure TScreenRec.KillBtnClick(Sender: TObject);
@@ -147,42 +173,74 @@ procedure TScreenRec.PlayBtnClick(Sender: TObject);
 begin
   if Proc.Active then
     Exit;
-  Proc.Executable:='/usr/bin/mplayer';
+
+  Proc.Executable := '/usr/bin/mplayer';
   Proc.Parameters.Clear;
-  Proc.Parameters.Add(FLVFile.Text);
-  RecBtn.Enabled:=False;
-  Proc.Active:=True;
+  Proc.Parameters.Add(VideoFile.Text);
+  RecBtn.Enabled := False; // Disable start recording button during playback
+
+  try
+    Proc.Active := True; // Start playback
+    Proc.WaitOnExit;     // Wait for playback process to finish
+  finally
+    RecBtn.Enabled := True; // Re-enable start recording button after playback
+  end;
 end;
 
 procedure TScreenRec.RecBtnClick(Sender: TObject);
 begin
-  if FileExists(FLVFile.Text) then
-    FLVFile.Text:=generateFileName;
+  if FileExists(VideoFile.Text) then
+    VideoFile.Text:=generateFileName;
   if (RecX.Text = '') or (RecY.Text = '') then
-    Exit;
+    begin
+      ShowMessage('Error: Recording position (X, Y) is not set.');
+      Exit;
+    end;
   startRecording;
 end;
 
 procedure TScreenRec.StopBtnClick(Sender: TObject);
 var
-  c: string[1];
-  i: integer;
+  QuitCommand: string;
+  TimeoutMs: Integer;
+  ProcessWasRunning: Boolean;
 begin
-  i:=0;
-  c:='q';
-  {if Proc.Running then
-    Proc.Input.Write(c[1], 1);
-  repeat
-    if i = 100 then
+  // Check if the process is running before sending commands
+  ProcessWasRunning := Proc.Running;
+
+  if ProcessWasRunning then
+  begin
+    // Attempt to gracefully stop FFmpeg
+    QuitCommand := 'q';
+    Proc.Input.Write(QuitCommand[1], Length(QuitCommand)); // Send 'q'
+    Proc.CloseInput; // Signal EOF to FFmpeg
+
+    // Wait for FFmpeg to exit gracefully
+    TimeoutMs := 5000; // Wait up to 5 seconds
+    if not Proc.WaitOnExit(TimeoutMs) then
     begin
-      Proc.Input.Write(c[1], 1);
-      i:=0;
+      // If FFmpeg doesn't exit, force terminate the process
+      Proc.Terminate(0); // Force termination
+      Proc.WaitOnExit; // Ensure process has fully terminated
     end;
-    Inc(i);
-    Application.ProcessMessages;
-  until Not Proc.Running;}
-  RecBtn.Enabled:=True;
-  PlayBtn.Enabled:=True;
+  end;
+
+  // Stop the timer and read process output
+  Timer.Enabled := False;
+
+  // Show messages based on the process state
+  if ProcessWasRunning then
+  begin
+    ShowMessage('Recording stopped.');
+  end
+  else
+  begin
+    ShowMessage('Process was not running.');
+  end;
+
+  // Ensure buttons are re-enabled
+  RecBtn.Enabled := True;
+  PlayBtn.Enabled := True;
 end;
 
 procedure TScreenRec.TimerTimer(Sender: TObject);
